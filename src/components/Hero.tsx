@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect, useState } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { MeshDistortMaterial, Float, Stars } from '@react-three/drei'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
