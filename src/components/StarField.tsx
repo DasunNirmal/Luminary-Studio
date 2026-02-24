@@ -5,9 +5,9 @@ interface Star {
     y: number
     size: number
     opacity: number
-    speed: number
     twinkleSpeed: number
     twinkleOffset: number
+    vy: number  // current velocity
 }
 
 export default function StarField() {
@@ -19,6 +19,18 @@ export default function StarField() {
         let animId: number
         let time = 0
 
+        // Scroll velocity tracking
+        let lastScrollY = window.scrollY
+        let scrollVelocity = 0
+        let targetVelocity = 0
+
+        const onScroll = () => {
+            const currentScrollY = window.scrollY
+            targetVelocity = (currentScrollY - lastScrollY) * 0.3
+            lastScrollY = currentScrollY
+        }
+        window.addEventListener('scroll', onScroll, { passive: true })
+
         const resize = () => {
             canvas.width = window.innerWidth
             canvas.height = window.innerHeight
@@ -26,49 +38,80 @@ export default function StarField() {
         resize()
         window.addEventListener('resize', resize)
 
-        // Generate stars
-        const stars: Star[] = Array.from({ length: 180 }, () => ({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+        const VIRTUAL_HEIGHT_MULTIPLIER = 6
+
+        const stars: Star[] = Array.from({ length: 900 }, () => ({
+            x: Math.random(),
+            y: Math.random() * VIRTUAL_HEIGHT_MULTIPLIER,
             size: Math.random() * 1.4 + 0.2,
-            opacity: Math.random() * 0.6 + 0.1,
-            speed: Math.random() * 0.015 + 0.005,   // very slow vertical drift
-            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            opacity: Math.random() * 0.7 + 0.15,
+            twinkleSpeed: Math.random() * 0.8 + 0.3,
             twinkleOffset: Math.random() * Math.PI * 2,
+            vy: 0,
         }))
 
         const draw = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height)
             time += 0.016
 
+            // Smooth velocity — lerp toward target then decay
+            scrollVelocity += (targetVelocity - scrollVelocity) * 0.15
+            targetVelocity *= 0.85  // decay
+
+            const scrollFraction = window.scrollY / Math.max(
+                document.body.scrollHeight - window.innerHeight, 1
+            )
+            const viewTop = scrollFraction * (VIRTUAL_HEIGHT_MULTIPLIER - 1)
+            const viewBottom = viewTop + 1
+
             stars.forEach((star) => {
-                // Twinkle — each star pulses at its own speed
-                const twinkle = Math.sin(time * star.twinkleSpeed * 60 + star.twinkleOffset)
+                if (star.y < viewTop - 0.05 || star.y > viewBottom + 0.05) return
+
+                const screenY = ((star.y - viewTop) / 1) * canvas.height
+                const screenX = star.x * canvas.width
+
+                // Twinkle dampens when scrolling fast — stars streak instead
+                const speed = Math.abs(scrollVelocity)
+                const twinkle = Math.sin(time * star.twinkleSpeed * 3 + star.twinkleOffset)
                 const opacity = star.opacity * (0.5 + 0.5 * twinkle)
 
-                // Slow drift upward, wrap around
-                star.y -= star.speed
-                if (star.y < 0) {
-                    star.y = canvas.height
-                    star.x = Math.random() * canvas.width
+                // Streak length proportional to scroll speed
+                const streakLength = Math.min(speed * 4, 40)
+
+                if (streakLength > 2) {
+                    // Draw as a streak/line when scrolling
+                    const gradient = ctx.createLinearGradient(
+                        screenX, screenY,
+                        screenX, screenY - streakLength
+                    )
+                    gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`)
+                    gradient.addColorStop(0.5, `rgba(167, 139, 250, ${opacity * 0.6})`)
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+                    ctx.beginPath()
+                    ctx.strokeStyle = gradient
+                    ctx.lineWidth = star.size * 0.8
+                    ctx.moveTo(screenX, screenY)
+                    ctx.lineTo(screenX, screenY - streakLength)
+                    ctx.stroke()
+                } else {
+                    // Draw as normal dot when still
+                    ctx.beginPath()
+                    ctx.arc(screenX, screenY, star.size, 0, Math.PI * 2)
+                    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`
+                    ctx.fill()
                 }
 
-                // Draw star
-                ctx.beginPath()
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
-                ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`
-                ctx.fill()
-
-                // Add a subtle glow to slightly bigger stars
+                // Purple glow for bigger stars
                 if (star.size > 1.1) {
-                    ctx.beginPath()
-                    ctx.arc(star.x, star.y, star.size * 2.5, 0, Math.PI * 2)
                     const gradient = ctx.createRadialGradient(
-                        star.x, star.y, 0,
-                        star.x, star.y, star.size * 2.5
+                        screenX, screenY, 0,
+                        screenX, screenY, star.size * 3
                     )
-                    gradient.addColorStop(0, `rgba(167, 139, 250, ${opacity * 0.4})`)
-                    gradient.addColorStop(1, 'rgba(0,0,0,0)')
+                    gradient.addColorStop(0, `rgba(167, 139, 250, ${opacity * 0.5})`)
+                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+                    ctx.beginPath()
+                    ctx.arc(screenX, screenY, star.size * 3, 0, Math.PI * 2)
                     ctx.fillStyle = gradient
                     ctx.fill()
                 }
@@ -82,14 +125,23 @@ export default function StarField() {
         return () => {
             cancelAnimationFrame(animId)
             window.removeEventListener('resize', resize)
+            window.removeEventListener('scroll', onScroll)
         }
     }, [])
 
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 pointer-events-none"
-            style={{ zIndex: 0 }}
+            className="star-canvas"
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                pointerEvents: 'none',
+                zIndex: 10,
+            }}
         />
     )
 }
