@@ -17,18 +17,20 @@ export default function About() {
     const bgTextY = useTransform(scrollYProgress, [0, 1], ['5%', '-15%'])
 
     return (
-        <section id="about" ref={sectionRef} className="bg-black py-40 px-8 overflow-hidden relative border-t border-white/5">
+        <section id="about" ref={sectionRef} className="bg-black/85 py-40 px-8 relative border-t border-white/5">
+            {/* Shapes — no overflow-hidden on section so they're visible */}
             <ParallaxShapes sectionRef={sectionRef} />
 
-            {/* Ghost background text */}
+            {/* Ghost background word */}
             <motion.div
                 style={{ y: bgTextY }}
                 className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
             >
-                <span className="text-[20vw] font-black text-white/[0.025] uppercase tracking-widest">ABOUT</span>
+                <span className="text-[20vw] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.07)' }}>ABOUT</span>
             </motion.div>
 
-            <div className="max-w-6xl mx-auto relative" ref={ref}>
+            {/* Content — z-10 so it sits above the background elements */}
+            <div className="max-w-6xl mx-auto relative z-10" ref={ref}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -38,7 +40,7 @@ export default function About() {
                     <span className="text-violet-400 tracking-[0.5em] text-xs uppercase">About Us</span>
                 </motion.div>
 
-                <div className="text-center mb-20 overflow-hidden">
+                <div className="text-center mb-20">
                     {['We push the limits', 'of digital design.'].map((line, li) => (
                         <div key={li} className="overflow-hidden">
                             <motion.h2

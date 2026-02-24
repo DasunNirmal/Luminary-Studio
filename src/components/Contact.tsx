@@ -5,7 +5,7 @@ export default function Contact() {
     const { ref, isInView } = useScrollAnimation()
 
     return (
-        <section id="contact" className="bg-black py-32 px-8 border-t border-white/5">
+        <section id="contact" className="bg-black/85 py-32 px-8 border-t border-white/5">
             <div className="max-w-3xl mx-auto text-center" ref={ref}>
                 <motion.p
                     initial={{ opacity: 0 }}

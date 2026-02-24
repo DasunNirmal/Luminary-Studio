@@ -1,8 +1,8 @@
-import {motion, useScroll, useTransform} from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { Layers, Zap, Globe, Cpu } from 'lucide-react'
 import ParallaxShapes from './ParallaxShapes'
-import {useRef} from "react";
+import { useRef } from 'react'
 
 const services = [
     { icon: Layers, title: 'Brand Identity', num: '01', description: 'We craft memorable brand identities that resonate with your audience and set you apart in a noisy world.' },
@@ -18,16 +18,28 @@ export default function Services() {
     const bgTextY = useTransform(scrollYProgress, [0, 1], ['5%', '-15%'])
 
     return (
-        <section id="services" ref={sectionRef} className="bg-black py-40 px-8 border-t border-white/5 relative overflow-hidden">
+        <section id="services" ref={sectionRef} className="bg-black/85 py-40 px-8 border-t border-white/5 relative">
+            {/* Floating geometric shapes */}
             <ParallaxShapes sectionRef={sectionRef} />
-            <div className="max-w-6xl mx-auto" ref={ref}>
 
-                {/* Label + headline centered */}
+            {/* Ghost background word — OUTSIDE the content div, positioned absolute */}
+            <motion.div
+                style={{ y: bgTextY }}
+                className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+            >
+                <span className="text-[18vw] font-black uppercase tracking-widest whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.07)' }}>SERVICES</span>
+            </motion.div>
+
+            {/* Actual content */}
+            <div className="max-w-6xl mx-auto relative z-10" ref={ref}>
+
                 <motion.div
-                    style={{ y: bgTextY }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-4"
                 >
-                    <span className="text-[18vw] font-black text-white/[0.02] uppercase tracking-widest whitespace-nowrap">SERVICES</span>
+                    <span className="text-violet-400 tracking-[0.5em] text-xs uppercase">What We Do</span>
                 </motion.div>
 
                 <div className="overflow-hidden text-center mb-20">
@@ -41,7 +53,6 @@ export default function Services() {
                     </motion.h2>
                 </div>
 
-                {/* Services as full-width rows — editorial like accordion */}
                 <div className="flex flex-col">
                     {services.map((service, i) => {
                         const Icon = service.icon
@@ -61,7 +72,6 @@ export default function Services() {
                                     </div>
                                     <h3 className="text-white text-xl md:text-2xl font-bold">{service.title}</h3>
                                 </div>
-
                                 <div className="flex items-center gap-8">
                                     <p className="text-white/30 text-sm max-w-sm hidden md:block">{service.description}</p>
                                     <motion.span

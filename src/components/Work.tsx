@@ -97,9 +97,9 @@ export default function Work() {
 
     return (
         // Tall container to give room for pin effect
-        <section id="work" ref={containerRef} className="relative bg-black" style={{ height: '300vh' }}>
+        <section id="work" ref={containerRef} className="relative bg-black/85" style={{ height: '300vh' }}>
             {/* Sticky wrapper */}
-            <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
+            <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center bg-black/85">
                 {/* Header */}
                 <div className="px-8 md:px-16 mb-12 flex items-end justify-between">
                     <div>

@@ -8,7 +8,7 @@ const items = [
 
 export default function Marquee() {
     return (
-        <div className="bg-violet-600 py-4 overflow-hidden border-y border-violet-500/50">
+        <div className="bg-violet-600/90 py-4 overflow-hidden border-y border-violet-500/50">
             <motion.div
                 animate={{ x: ['0%', '-50%'] }}
                 transition={{ repeat: Infinity, duration: 18, ease: 'linear' }}

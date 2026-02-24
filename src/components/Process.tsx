@@ -18,7 +18,7 @@ export default function Process() {
     const lineHeight = useTransform(scrollYProgress, [0.1, 0.9], ['0%', '100%'])
 
     return (
-        <section ref={sectionRef} className="bg-black py-40 px-8 border-t border-white/5 relative overflow-hidden">
+        <section ref={sectionRef} className="bg-black/85 py-40 px-8 border-t border-white/5 relative">
             <ParallaxShapes sectionRef={sectionRef} />
 
             {/* Ghost BG text */}
@@ -26,10 +26,10 @@ export default function Process() {
                 style={{ y: bgTextY }}
                 className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
             >
-                <span className="text-[16vw] font-black text-white/[0.02] uppercase tracking-widest whitespace-nowrap">PROCESS</span>
+                <span className="text-[16vw] font-black uppercase tracking-widest whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.07)' }}>PROCESS</span>
             </motion.div>
 
-            <div className="max-w-6xl mx-auto relative" ref={ref}>
+            <div className="max-w-6xl mx-auto relative z-10" ref={ref}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}

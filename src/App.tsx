@@ -9,13 +9,15 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import { useLenis } from './hooks/useLenis'
 import Process from "./components/Process.tsx";
+import StarField from "./components/StarField.tsx";
 
 function App() {
     useLenis()
 
     return (
-        <main className="bg-black">
+        <main className="bg-transparent">
             <Cursor />
+            <StarField />
             <Navbar />
             <Hero />
             <Marquee />
